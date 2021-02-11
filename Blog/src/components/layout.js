@@ -1,55 +1,89 @@
-/**
- * Layout component that queries for data
- * with Gatsby's useStaticQuery component
- *
- * See: https://www.gatsbyjs.com/docs/use-static-query/
- */
+import React from 'react';
+import styled from '@emotion/styled';
+import { MDXProvider } from '@mdx-js/react';
 
-import React from "react"
-import PropTypes from "prop-types"
-import { useStaticQuery, graphql } from "gatsby"
+import ThemeProvider from './theme/themeProvider';
+import mdxComponents from './mdxComponents';
+import Sidebar from './sidebar';
+import RightSidebar from './rightSidebar';
+import config from '../../config.js';
 
-import Header from "./header"
-import "./layout.css"
+const Wrapper = styled('div')`
+  display: flex;
+  justify-content: space-between;
+  background: ${({ theme }) => theme.colors.background};
 
-const Layout = ({ children }) => {
-  const data = useStaticQuery(graphql`
-    query SiteTitleQuery {
-      site {
-        siteMetadata {
-          title
-        }
-      }
-    }
-  `)
+  .sideBarUL li a {
+    color: ${({ theme }) => theme.colors.text};
+  }
 
-  return (
-    <>
-      <Header siteTitle={data.site.siteMetadata?.title || `Title`} />
-      <div
-        style={{
-          margin: `0 auto`,
-          maxWidth: 960,
-          padding: `0 1.0875rem 1.45rem`,
-        }}
-      >
-        <main>{children}</main>
-        <footer
-          style={{
-            marginTop: `2rem`,
-          }}
-        >
-          © {new Date().getFullYear()}, Built with
-          {` `}
-          <a href="https://www.gatsbyjs.com">Gatsby</a>
-        </footer>
-      </div>
-    </>
-  )
-}
+  .sideBarUL .item > a:hover {
+    background-color: #1ed3c6;
+    color: #fff !important;
 
-Layout.propTypes = {
-  children: PropTypes.node.isRequired,
-}
+    /* background: #F8F8F8 */
+  }
 
-export default Layout
+  @media only screen and (max-width: 767px) {
+    display: block;
+  }
+`;
+
+const Content = styled('main')`
+  display: flex;
+  flex-grow: 1;
+  margin: 0px 88px;
+  padding-top: 3rem;
+  background: ${({ theme }) => theme.colors.background};
+
+  table tr {
+    background: ${({ theme }) => theme.colors.background};
+  }
+
+  @media only screen and (max-width: 1023px) {
+    padding-left: 0;
+    margin: 0 10px;
+    padding-top: 3rem;
+  }
+`;
+
+const MaxWidth = styled('div')`
+  @media only screen and (max-width: 50rem) {
+    width: 100%;
+    position: relative;
+  }
+`;
+
+const LeftSideBarWidth = styled('div')`
+  width: 298px;
+`;
+
+const RightSideBarWidth = styled('div')`
+  width: 224px;
+`;
+
+const Layout = ({ children, location }) => (
+  <ThemeProvider location={location}>
+    <MDXProvider components={mdxComponents}>
+      <Wrapper>
+        <LeftSideBarWidth className={'hiddenMobile'}>
+          <Sidebar location={location} />
+        </LeftSideBarWidth>
+        {config.sidebar.title ? (
+          <div
+            className={'sidebarTitle sideBarShow'}
+            dangerouslySetInnerHTML={{ __html: config.sidebar.title }}
+          />
+        ) : null}
+        <Content>
+          <MaxWidth>{children}</MaxWidth>
+        </Content>
+        <RightSideBarWidth className={'hiddenMobile'}>
+          <RightSidebar location={location} />
+        </RightSideBarWidth>
+      </Wrapper>
+    </MDXProvider>
+  </ThemeProvider>
+);
+
+export default Layout;
